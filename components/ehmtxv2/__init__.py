@@ -512,7 +512,7 @@ async def to_code(config):
                 width,
                 height,
                 frames,
-                espImage.IMAGE_TYPE["RGB565"],
+                espImage.get_image_type_enum("RGB565"),
                 str(conf[CONF_ID]),
                 conf[CONF_PINGPONG],
                 duration,
