@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <string>
 #include <regex>
+#include <cmath>
 
 // #define USE_ESP32
 // #define EHMTXv2_ADV_BOOT
@@ -1659,6 +1660,8 @@ namespace esphome
       }
 
       // blend handling
+      static float last_correction = -1.0f;  // Track last applied correction to avoid redundant calls
+
 #ifdef EHMTXv2_BLEND_STEPS
       if ((this->ticks_ <= EHMTXv2_BLEND_STEPS) && (this->brightness_ >= 50) && (this->queue_count() > 1))
       {
@@ -1667,7 +1670,12 @@ namespace esphome
         if (this->ticks_ <= current_step)
         {
           float br = std::lerp(0, (float)b / 255, (float)this->ticks_ / current_step);
-          this->display->get_light()->set_correction(br, br, br);
+          // Only apply correction if it changed significantly (avoid triggering transitions on tiny changes)
+          if (fabs(br - last_correction) > 0.001f)
+          {
+            this->display->get_light()->set_correction(br, br, br);
+            last_correction = br;
+          }
         }
       }
       else
@@ -1677,7 +1685,12 @@ namespace esphome
         {
           this->brightness_ = this->brightness_ + (this->target_brightness_ < this->brightness_ ? -1 : 1);
           float br = (float)this->brightness_ / (float)255;
-          this->display->get_light()->set_correction(br, br, br);
+          // Only apply correction when brightness actually changed
+          if (fabs(br - last_correction) > 0.001f)
+          {
+            this->display->get_light()->set_correction(br, br, br);
+            last_correction = br;
+          }
         }
       }
       this->ticks_++;
