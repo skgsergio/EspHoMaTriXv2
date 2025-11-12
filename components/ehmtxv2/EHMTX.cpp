@@ -1674,7 +1674,6 @@ namespace esphome
           if (fabs(br - last_correction) > 0.001f)
           {
             this->display->get_light()->set_correction(br, br, br);
-            this->display->get_light()->schedule_show();
             last_correction = br;
           }
         }
@@ -1690,7 +1689,6 @@ namespace esphome
           if (fabs(br - last_correction) > 0.001f)
           {
             this->display->get_light()->set_correction(br, br, br);
-            this->display->get_light()->schedule_show();
             last_correction = br;
           }
         }
@@ -2662,12 +2660,10 @@ namespace esphome
 
       // Apply correction immediately to ensure display works from startup
       // This is critical for ESPHome 2025.11.0+ where the new transition algorithm
-      // requires explicit correction to be set, and schedule_show() is needed to
-      // trigger the actual light update
+      // requires explicit correction to be set
       if (this->display != nullptr)
       {
         this->display->get_light()->set_correction(br, br, br);
-        this->display->get_light()->schedule_show();
       }
 
       ESP_LOGI(TAG, "set_brightness %d => %.2f %%", value, 100 * br);
@@ -2686,7 +2682,6 @@ namespace esphome
       if (this->display != nullptr)
       {
         this->display->get_light()->set_correction(br, br, br);
-        this->display->get_light()->schedule_show();
       }
     }
   }
