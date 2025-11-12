@@ -2648,7 +2648,24 @@ namespace esphome
     if (value < 256)
     {
       this->target_brightness_ = value;
+
+      // Also set current brightness immediately on initial setup
+      // This ensures the brightness ramping logic doesn't interfere
+      if (this->brightness_ == 0 && value > 0)
+      {
+        this->brightness_ = value;
+      }
+
       float br = (float)value / (float)255;
+
+      // Apply correction immediately to ensure display works from startup
+      // This is critical for ESPHome 2025.11.0+ where the new transition algorithm
+      // requires explicit correction to be set
+      if (this->display != nullptr)
+      {
+        this->display->get_light()->set_correction(br, br, br);
+      }
+
       ESP_LOGI(TAG, "set_brightness %d => %.2f %%", value, 100 * br);
     }
   }
@@ -2659,6 +2676,13 @@ namespace esphome
     if (value < 256)
     {
       this->target_brightness_ = value;
+      float br = (float)value / (float)255;
+
+      // Apply correction immediately (silent version doesn't log)
+      if (this->display != nullptr)
+      {
+        this->display->get_light()->set_correction(br, br, br);
+      }
     }
   }
 #endif
